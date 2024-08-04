@@ -11,8 +11,7 @@ Solutions to [SQLZOO Tutorials.](https://sqlzoo.net)
 7. [JOIN](#7-join)
 8. [More JOIN](#8-more-join)
 9. [Using NULL](#9-using-null)
-10. [Window function](#10-window-function)
-11. [Self JOIN](#11-self-join)
+10. [Self JOIN](#10-self-join)
 
 ## 1. [SELECT basics](https://sqlzoo.net/wiki/SELECT_basics)
 
@@ -645,7 +644,7 @@ SELECT name, CASE WHEN dept IN (1,2) THEN 'Sci'
 FROM teacher
 ```
 
-## 11. [Self JOIN](https://sqlzoo.net/wiki/Self_join)
+## 10. [Self JOIN](https://sqlzoo.net/wiki/Self_join)
 
 1. How many stops are in the database?
 ```sql
