@@ -476,7 +476,6 @@ GROUP BY mdate, matchid, team1, team2;
 ```
 
 ## 8. [More JOIN](https://sqlzoo.net/wiki/More_JOIN_operations)
-<img src="images/movie_table.png" height = 50>
 
 1. List the films where the yr is 1962. Show id and title.
 ```sql
@@ -647,7 +646,6 @@ FROM teacher
 ```
 
 ## 11. [Self JOIN](https://sqlzoo.net/wiki/Self_join)
-<img src="images/buses_table.png" height = 250>
 
 1. How many stops are in the database?
 ```sql
