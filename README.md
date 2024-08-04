@@ -473,5 +473,246 @@ SELECT mdate, team1, SUM(CASE WHEN teamid = team1 THEN 1 ELSE 0 END) AS score1,
 FROM game
 LEFT JOIN goal ON game.id = goal.matchid
 GROUP BY mdate, matchid, team1, team2;
+```
+
+## 8. [More JOIN](https://sqlzoo.net/wiki/More_JOIN_operations)
+<img src="images/movie_table.png" height = 50>
+
+1. List the films where the yr is 1962. Show id and title.
+```sql
+SELECT id, title
+FROM movie
+WHERE yr=1962
+```
+2. When was Citizen Kane released?
+```sql
+SELECT yr FROM movie
+WHERE title ='Citizen Kane'
+```
+3. List all of the Star Trek movies, include the id, title and yr (all of these movies include the words Star Trek in the title). Order results by year.
+```sql
+SELECT id,title,yr 
+FROM movie
+WHERE title LIKE '%Star Trek%'
+ORDER BY yr
+```
+4. What's the id for actor Glenn Close?
+```sql
+SELECT id FROM actor
+WHERE name = 'Glenn Close'
+```
+5. What's the id of the film Casablanca?
+```sql
+SELECT id FROM movie
+WHERE title = 'Casablanca'
+```
+6. Obtain the cast list for Casablanca.
+```sql
+SELECT name FROM actor
+JOIN casting ON actor.id = casting.actorid
+WHERE movieid = 11768
+```
+7. Obtain the cast list for the film Alien.
+```sql
+SELECT name 
+FROM movie JOIN casting ON movie.id = casting.movieid
+JOIN actor ON actor.id = casting.actorid
+WHERE title = 'Alien'  
 
 ```
+8. List the films in which Harrison Ford has appeared.
+```sql
+SELECT title 
+FROM movie JOIN casting ON movie.id = casting.movieid
+JOIN actor ON actor.id = casting.actorid
+WHERE name = 'Harrison Ford'
+```
+9. List the films in which Harrison Ford has appeared but not in the starring role. (The ord field indicates the position of the actor. If ord = 1 then the actor is in the starring role.)
+```sql
+SELECT title 
+FROM movie JOIN casting ON movie.id = casting.movieid
+JOIN actor ON actor.id = casting.actorid
+WHERE name = 'Harrison Ford' AND ord != 1 
+```
+10. List the films together with the leading star for all 1962 films.
+```sql
+SELECT title,name
+FROM movie JOIN casting ON movie.id = casting.movieid
+JOIN actor ON actor.id = casting.actorid
+WHERE yr = 1962 AND ord = 1
+```
+11. Which were the busiest years for Rock Hudson? Show the year and the number of movies he made each year for any year in which he made more than two movies.
+```sql
+SELECT yr,COUNT(title)
+FROM movie JOIN casting ON movie.id = casting.movieid
+JOIN actor ON actor.id = casting.actorid
+WHERE name = 'Rock Hudson'
+GROUP BY yr
+HAVING COUNT(title)>2
+```
+12. List the film title and the leading actor for all of the films Julie Andrews played in.
+```sql
+SELECT title,name
+FROM movie JOIN casting ON movie.id =casting.movieid
+JOIN actor ON actor.id = casting.actorid
+WHERE movie.id IN(SELECT movieid
+FROM actor JOIN casting ON actor.id = casting.actorid
+WHERE name = 'Julie Andrews') 
+AND ord = 1
+```
+13. Obtain a list, in alphabetical order, of actors who've had at least 15 starring roles.
+```sql
+SELECT name
+FROM actor JOIN casting ON actor.id = casting.actorid
+WHERE ord = 1
+GROUP BY name
+HAVING COUNT(id) >= 15
+ORDER BY name
+```
+14. List the films released in the year 1978 ordered by the number of actors in the cast, then by title.
+```sql
+SELECT title,COUNT(actorid)
+FROM movie JOIN casting ON movie.id = casting.movieid
+JOIN actor ON actor.id = casting.actorid
+WHERE yr = 1978
+GROUP BY title
+ORDER BY COUNT(actorid) DESC,title
+```
+15. List all the people who have worked with Art Garfunkel.
+```sql
+SELECT DISTINCT(name)
+FROM movie JOIN casting ON movie.id = casting.movieid
+JOIN actor ON actor.id = casting.actorid
+WHERE movie.id IN(SELECT movieid FROM actor JOIN casting ON actor.id = casting.actorid WHERE name = 'Art Garfunkel') AND name <> 'Art Garfunkel'
+```
+
+## 9. [Using NULL](https://sqlzoo.net/wiki/Using_Null)
+
+1. List the teachers who have NULL for their department.
+```sql
+SELECT name
+FROM teacher
+WHERE dept IS NULL
+```
+2. Note the INNER JOIN misses the teachers with no department and the departments with no teacher.
+```sql
+SELECT teacher.name, dept.name
+FROM teacher JOIN dept ON teacher.dept=dept.id
+```
+3. Use a different JOIN so that all teachers are listed.
+```sql
+SELECT teacher.name, dept.name
+FROM teacher LEFT JOIN dept ON dept.id = teacher.dept
+```
+4. Use a different JOIN so that all departments are listed.
+```sql
+SELECT teacher.name, dept.name
+FROM teacher RIGHT JOIN dept ON dept.id = teacher.dept  
+```
+5. Use COALESCE to print the mobile number. Use the number "07986 444 2266" if there is no number given. Show teacher name and mobile number.
+```sql
+SELECT name,COALESCE(mobile,'07986 444 2266')
+FROM teacher 
+```
+6. Use the COALESCE function and a LEFT JOIN to print the teacher name and department name. Use the string "None" where there is no department.
+```sql
+SELECT teacher.name,COALESCE(dept.name,'None')
+FROM teacher LEFT JOIN dept ON (teacher.dept = dept.id)
+```
+7. Use COUNT to show the number of teachers and the number of mobile phones.
+```sql
+SELECT COUNT(name),COUNT(mobile)
+FROM teacher
+```
+8. Use COUNT and GROUP BY dept.name to show each department and the number of staff. Use a RIGHT JOIN to ensure that the Engineering department is listed.
+```sql
+SELECT dept.name,COUNT(teacher.name)
+FROM teacher RIGHT JOIN dept ON teacher.dept = dept.id
+GROUP BY dept.name
+```
+9. Use CASE to show the name of each teacher followed by "Sci" if the teacher is in dept 1 or 2 and "Art" otherwise.
+```sql
+SELECT name,CASE WHEN dept IN (1,2) THEN 'Sci'
+                  ELSE 'Art'
+            END
+FROM teacher
+```
+10. Use CASE to show the name of each teacher followed by "Sci" if the teacher is in dept 1 or 2, show "Art" if the teacher's dept is 3 and "None" otherwise.
+```sql
+SELECT name, CASE WHEN dept IN (1,2) THEN 'Sci'
+                 WHEN dept=3 THEN 'ART'
+                 ELSE 'None' 
+            END
+FROM teacher
+```
+
+## 11. [Self JOIN](https://sqlzoo.net/wiki/Self_join)
+<img src="images/buses_table.png" height = 250>
+
+1. How many stops are in the database?
+```sql
+SELECT COUNT(id)
+FROM stops
+```
+2. Find the id value for the stop "Craiglockhart".
+```sql
+SELECT id FROM stops
+WHERE name = 'Craiglockhart'
+```
+3. Give the id and the name for the stops on the "4" "LRT" service.
+```sql
+SELECT id,name 
+FROM stops JOIN route ON route.stop=stops.id
+WHERE num = '4' AND company = 'LRT' 
+```
+4. The query shown gives the number of routes that visit either London Road (149) or Craiglockhart (53). Run the query and notice the two services that link these stops have a count of 2. Add a HAVING clause to restrict the output to these two routes.
+```sql
+SELECT company,num,COUNT(*)
+FROM stops JOIN route ON stops.id = route.stop
+WHERE id = 53 or id = 149
+GROUP BY num
+HAVING COUNT(num)=2
+```
+5. Execute the self join shown and observe that b.stop gives all the places you can get to from Craiglockhart, without changing routes. Change the query so that it shows the services from Craiglockhart to London Road.
+```sql
+SELECT a.company, a.num, a.stop, b.stop
+FROM route a JOIN route b ON
+  (a.company=b.company AND a.num=b.num)
+WHERE a.stop=53 AND b.stop = 149
+```
+6. The query shown is similar to the previous one, however by joining two copies of the stops table we can refer to stops by name rather than by number. Change the query so that the services between Craiglockhart and London Road are shown.
+```sql
+SELECT a.company, a.num, stop1.name, stop2.name
+FROM route a JOIN route b ON (a.company=b.company AND a.num=b.num)
+JOIN stops stop1 ON (a.stop=stop1.id)
+JOIN stops stop2 ON (b.stop=stop2.id)
+WHERE stop1.name='Craiglockhart' AND stop2.name ='London Road'
+```
+7. Give a list of all the services which connect stops 115 and 137 ("Haymarket" and "Leith").
+```sql
+SELECT DISTINCT a.company,a.num 
+FROM route a JOIN route b
+ON (a.num = b.num)
+WHERE a.stop = 115 AND b.stop = 137
+```
+8. Give a list of the services which connect the stops "Craiglockhart" and "Tollcross".
+```sql
+SELECT DISTINCT a.company,a.num 
+FROM route a JOIN route b ON a.num = b.num
+WHERE a.stop IN (SELECT id FROM stops
+WHERE name = 'Tollcross') 
+AND b.stop IN (SELECT id FROM stops
+WHERE name = 'Craiglockhart')
+```
+9. Give a distinct list of the stops which may be reached from "Craiglockhart" by taking one bus, including "Craiglockhart" itself, offered by the LRT company. Include the company and bus no. of the relevant services.
+```sql
+SELECT stops.name,route.company,route.num 
+FROM route JOIN stops ON stops.id = route.stop
+WHERE route.num IN 
+                   (SELECT num FROM stops JOIN route ON 
+                   stops.id =  route.stop WHERE 
+                   route.company = 'LRT' AND route.stop 
+                    = 53)
+AND company = 'LRT'
+```
+
